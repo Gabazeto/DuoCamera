@@ -1,332 +1,736 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>MultiCam Duo - Live Ome.tv</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>MultiCam Studio • Ome.tv Collab</title>
   <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
   <style>
+    :root {
+      --bg-dark: #090b10;
+      --panel-bg: rgba(18, 22, 33, 0.82);
+      --border-glass: rgba(255, 255, 255, 0.1);
+      --border-neon: rgba(0, 240, 255, 0.35);
+      --accent-cyan: #00f0ff;
+      --accent-purple: #8a2be2;
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --danger: #ef4444;
+      --success: #10b981;
+    }
+
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       -webkit-font-smoothing: antialiased;
     }
 
     body {
-      background: #020617;
-      color: #f8fafc;
-      min-height: 100vh;
+      background: radial-gradient(circle at top left, #141a30 0%, var(--bg-dark) 55%, #040507 100%);
+      color: var(--text-main);
       height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
       overflow: hidden;
-    }
-
-    .app-container {
-      width: 100%;
-      height: 100%;
-      max-width: 540px;
-      position: relative;
-      background: #020617;
       display: flex;
       flex-direction: column;
     }
 
-    #lobbyScreen {
-      margin: auto 16px;
-      background: rgba(15, 23, 42, 0.92);
-      backdrop-filter: blur(16px);
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      border-radius: 20px;
-      padding: 24px;
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.85);
+    /* ================= TELA 1: MENU / LOBBY ================= */
+    #lobby-screen {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 50;
+      background: radial-gradient(circle at 50% 30%, rgba(0, 240, 255, 0.08), rgba(5, 7, 10, 0.95) 70%);
+      backdrop-filter: blur(8px);
+      transition: opacity 0.35s ease, visibility 0.35s ease;
     }
 
-    .header-lobby {
-      display: flex;
-      justify-content: space-between;
+    #lobby-screen.hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .lobby-card {
+      width: 100%;
+      max-width: 460px;
+      background: var(--panel-bg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--border-neon);
+      border-radius: 22px;
+      padding: 32px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.85), 0 0 35px rgba(0, 240, 255, 0.08);
+    }
+
+    .brand-badge {
+      display: inline-flex;
       align-items: center;
+      gap: 8px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      color: var(--accent-cyan);
+      background: rgba(0, 240, 255, 0.1);
+      border: 1px solid rgba(0, 240, 255, 0.25);
+      padding: 5px 12px;
+      border-radius: 999px;
       margin-bottom: 16px;
     }
-    .logo { display: flex; align-items: center; gap: 8px; font-size: 19px; font-weight: 700; }
-    .accent {
-      background: linear-gradient(135deg, #6366f1, #a855f7);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
+
+    .lobby-card h1 {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 6px;
+      letter-spacing: -0.5px;
+    }
+
+    .lobby-card p {
+      font-size: 14px;
+      color: var(--text-muted);
+      margin-bottom: 22px;
+      line-height: 1.4;
     }
 
     .preview-box {
       width: 100%;
-      height: 180px;
-      background: #090d16;
-      border-radius: 12px;
+      height: 160px;
+      background: #05070a;
+      border: 1px solid var(--border-glass);
+      border-radius: 14px;
       overflow: hidden;
-      margin-bottom: 16px;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-    }
-    .preview-box video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
-
-    .form-group { margin-bottom: 14px; }
-    .form-group label { display: block; font-size: 13px; font-weight: 500; color: #cbd5e1; margin-bottom: 6px; }
-    .form-group input {
-      width: 100%;
-      background: rgba(255, 255, 255, 0.06);
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      border-radius: 10px;
-      padding: 12px 14px;
-      color: #ffffff;
-      font-size: 15px;
-      outline: none;
-    }
-    .form-group input:focus { border-color: #6366f1; }
-
-    .btn-join {
-      width: 100%;
-      padding: 14px;
-      border-radius: 12px;
-      font-size: 15px;
-      font-weight: 600;
-      border: none;
-      cursor: pointer;
-      background: linear-gradient(135deg, #6366f1, #8b5cf6);
-      color: white;
-      box-shadow: 0 4px 14px rgba(99, 102, 241, 0.4);
-    }
-
-    #callScreen {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      flex-direction: column;
-      width: 100%;
-      height: 100%;
-      background: #000;
-    }
-
-    .stage-container {
+      margin-bottom: 18px;
       position: relative;
-      flex: 1;
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-      background: #020617;
     }
 
-    #masterBroadcastVideo {
+    .preview-box video {
       width: 100%;
       height: 100%;
       object-fit: cover;
+      transform: scaleX(-1);
     }
 
-    .top-bar {
+    .preview-badge {
+      position: absolute;
+      bottom: 8px;
+      left: 8px;
+      background: rgba(0, 0, 0, 0.75);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 6px;
+      color: var(--accent-cyan);
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 7px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .input-row {
+      display: flex;
+      gap: 8px;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      background: rgba(9, 11, 16, 0.85);
+      border: 1px solid var(--border-glass);
+      color: var(--text-main);
+      padding: 12px 14px;
+      border-radius: 12px;
+      font-size: 14px;
+      outline: none;
+      transition: all 0.2s;
+    }
+
+    input[type="text"]:focus {
+      border-color: var(--accent-cyan);
+      box-shadow: 0 0 0 3px rgba(0, 240, 255, 0.2);
+    }
+
+    .btn {
+      cursor: pointer;
+      border: none;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 13px;
+      padding: 11px 15px;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      user-select: none;
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.07);
+      color: var(--text-main);
+      border: 1px solid var(--border-glass);
+      white-space: nowrap;
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.15);
+      border-color: rgba(255, 255, 255, 0.25);
+    }
+
+    .btn-primary {
+      width: 100%;
+      margin-top: 6px;
+      padding: 14px;
+      font-size: 15px;
+      color: #050608;
+      background: linear-gradient(135deg, var(--accent-cyan), #38bdf8);
+      box-shadow: 0 8px 20px rgba(0, 240, 255, 0.3);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 12px 26px rgba(0, 240, 255, 0.42);
+    }
+
+    /* ================= TELA 2: SALA PRINCIPAL ================= */
+    #room-screen {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      width: 100%;
+    }
+
+    .topbar {
+      height: 58px;
+      padding: 0 20px;
+      background: rgba(13, 16, 24, 0.95);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-glass);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+      z-index: 10;
+    }
+
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .brand-title {
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+    }
+
+    .brand-title span {
+      color: var(--accent-cyan);
+    }
+
+    .room-pill {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-glass);
+      padding: 6px 12px;
+      border-radius: 10px;
+      font-size: 13px;
+    }
+
+    .room-pill span {
+      color: var(--accent-cyan);
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      font-family: monospace;
+    }
+
+    .topbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn-sm {
+      padding: 7px 13px;
+      font-size: 12px;
+      border-radius: 8px;
+    }
+
+    /* Área Principal (Workspace) */
+    .workspace {
+      flex: 1;
+      display: flex;
+      overflow: hidden;
+      padding: 14px;
+      gap: 14px;
+    }
+
+    /* PALCO CENTRAL: OME.TV / OMEGLE (100% FIEL À RESOLUÇÃO NATIVA) */
+    .center-stage {
+      flex: 1;
+      background: #040508;
+      border: 1px solid var(--border-glass);
+      border-radius: 18px;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.8);
+    }
+
+    .native-video-wrapper {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      padding: 10px;
+    }
+
+    /* 100% da Resolução Nativa sem corte (contain) */
+    .native-video-wrapper video {
+      max-width: 100%;
+      max-height: 100%;
+      width: auto;
+      height: auto;
+      object-fit: contain;
+      border-radius: 12px;
+      background: #000;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.7);
+      transition: all 0.2s ease;
+    }
+
+    .native-video-wrapper video.mirrored {
+      transform: scaleX(-1);
+    }
+
+    .stage-label {
       position: absolute;
       top: 14px;
       left: 14px;
-      right: 14px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      z-index: 20;
-      pointer-events: none;
-    }
-
-    .live-badge {
-      background: rgba(239, 68, 68, 0.9);
-      color: #ffffff;
-      font-size: 12px;
-      font-weight: 700;
-      padding: 6px 12px;
+      background: rgba(9, 11, 16, 0.85);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--border-glass);
+      padding: 6px 14px;
       border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
       display: flex;
       align-items: center;
-      gap: 6px;
-      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+      gap: 8px;
+      z-index: 10;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
     }
 
     .live-dot {
       width: 8px;
       height: 8px;
       border-radius: 50%;
-      background: #ffffff;
-      animation: pulse 1s infinite;
+      background: var(--success);
+      box-shadow: 0 0 10px var(--success);
+      animation: pulse 1.5s infinite;
     }
+
     @keyframes pulse {
       0% { opacity: 1; }
-      50% { opacity: 0.3; }
+      50% { opacity: 0.35; }
       100% { opacity: 1; }
     }
 
-    .status-badge {
-      background: rgba(15, 23, 42, 0.85);
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      backdrop-filter: blur(8px);
-      padding: 6px 12px;
-      border-radius: 999px;
+    .res-tag {
+      color: var(--accent-cyan);
+      font-family: monospace;
       font-size: 11px;
-      font-weight: 600;
-      color: #10b981;
+      margin-left: 4px;
     }
 
-    .floating-bottom-bar {
+    .stage-controls {
       position: absolute;
-      bottom: 16px;
-      left: 14px;
-      right: 14px;
+      bottom: 18px;
+      left: 50%;
+      transform: translateX(-50%);
       display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 14px;
-      background: rgba(15, 23, 42, 0.75);
+      gap: 10px;
+      background: rgba(14, 18, 28, 0.88);
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      padding: 10px;
-      border-radius: 20px;
-      z-index: 40;
+      padding: 8px 16px;
+      border-radius: 16px;
+      border: 1px solid var(--border-neon);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+      z-index: 10;
     }
 
     .ctrl-btn {
-      width: 48px;
-      height: 48px;
-      border-radius: 50%;
-      background: rgba(255, 255, 255, 0.1);
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      color: white;
-      font-size: 20px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text-main);
+      border: 1px solid var(--border-glass);
+      padding: 9px 15px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 600;
       cursor: pointer;
       transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
     }
 
-    .ctrl-btn:hover { background: rgba(255, 255, 255, 0.2); transform: scale(1.05); }
-    .ctrl-btn:active { transform: scale(0.95); }
+    .ctrl-btn:hover {
+      background: rgba(255, 255, 255, 0.18);
+      border-color: rgba(255, 255, 255, 0.3);
+    }
 
-    .ctrl-btn.off {
-      background: rgba(239, 68, 68, 0.3);
-      border-color: #ef4444;
+    .ctrl-btn.active-danger {
+      background: rgba(239, 68, 68, 0.25);
+      border-color: var(--danger);
       color: #fca5a5;
     }
 
-    .btn-leave {
-      background: rgba(239, 68, 68, 0.4);
-      border-color: rgba(239, 68, 68, 0.6);
+    /* ================= LATERAL DIREITA: 4 SLOTS DE CÂMERAS ================= */
+    .friends-sidebar {
+      width: 290px;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      height: 100%;
     }
-    .btn-leave:hover { background: #ef4444; }
 
-    .hidden { display: none !important; }
+    .cam-slot {
+      flex: 1;
+      min-height: 0;
+      background: rgba(12, 15, 24, 0.9);
+      border: 1px solid var(--border-glass);
+      border-radius: 14px;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      padding: 6px;
+      transition: border-color 0.25s ease;
+    }
+
+    .cam-slot.active-slot {
+      border-color: rgba(0, 240, 255, 0.45);
+      box-shadow: inset 0 0 20px rgba(0, 240, 255, 0.06);
+    }
+
+    /* Webcam do amigo com fidelidade total à resolução nativa */
+    .cam-slot video {
+      max-width: 100%;
+      max-height: 100%;
+      width: auto;
+      height: auto;
+      object-fit: contain; /* Proporção 100% natural, sem crop */
+      border-radius: 8px;
+      background: #000;
+    }
+
+    .cam-slot video.mirrored {
+      transform: scaleX(-1);
+    }
+
+    .slot-empty {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 10px;
+      color: var(--text-muted);
+      gap: 6px;
+      user-select: none;
+    }
+
+    .slot-empty span {
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .slot-badge {
+      position: absolute;
+      bottom: 6px;
+      left: 6px;
+      right: 6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(5, 7, 10, 0.85);
+      backdrop-filter: blur(8px);
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 11px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      pointer-events: none;
+      z-index: 5;
+    }
+
+    .slot-badge strong {
+      font-size: 11px;
+      color: #ffffff;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 130px;
+    }
+
+    /* Toast */
+    #toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--accent-cyan);
+      color: #050608;
+      font-weight: 700;
+      font-size: 13px;
+      padding: 10px 18px;
+      border-radius: 10px;
+      box-shadow: 0 10px 25px rgba(0, 240, 255, 0.35);
+      opacity: 0;
+      transform: translateY(12px);
+      transition: all 0.25s ease;
+      z-index: 100;
+      pointer-events: none;
+    }
+
+    #toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    @media (max-width: 860px) {
+      .workspace {
+        flex-direction: column;
+      }
+      .friends-sidebar {
+        width: 100%;
+        height: 180px;
+        flex-direction: row;
+      }
+    }
   </style>
 </head>
 <body>
-  <div class="app-container">
-    <div id="lobbyScreen">
-      <div class="header-lobby">
-        <div class="logo">
-          <span>🎥</span>
-          <span>MultiCam <span class="accent">Duo</span></span>
+
+  <!-- ==================== TELA 1: LOBBY ==================== -->
+  <div id="lobby-screen">
+    <div class="lobby-card">
+      <div class="brand-badge">● MultiCam Studio</div>
+      <h1>Conectar Câmeras</h1>
+      <p>Transmita colaborativamente com resolução nativa integrada ao Ome.tv / Omegle.</p>
+
+      <div class="preview-box">
+        <video id="lobby-preview" autoplay playsinline muted></video>
+        <div class="preview-badge" id="lobby-res">Aguardando câmera...</div>
+      </div>
+
+      <div class="form-group">
+        <label for="room-input">Link ou Código da Sala</label>
+        <div class="input-row">
+          <input type="text" id="room-input" placeholder="Ex: DUO-8492" autocomplete="off" />
+          <button type="button" class="btn btn-secondary" onclick="generateNewCode()" title="Gerar novo código">Novo</button>
+          <button type="button" class="btn btn-secondary" onclick="copyInviteLink()">Copiar</button>
         </div>
       </div>
 
-      <div class="preview-box">
-        <video id="lobbyVideo" autoplay playsinline muted></video>
-      </div>
-
       <div class="form-group">
-        <label for="roomInput">ID da Sala:</label>
-        <input type="text" id="roomInput" placeholder="Ex: duo-abc123" required autocomplete="off">
+        <label for="username-input">Seu Nome / Apelido</label>
+        <input type="text" id="username-input" placeholder="Digite seu apelido..." maxlength="20" />
       </div>
 
-      <div class="form-group">
-        <label for="nameInput">Seu Nome / Apelido:</label>
-        <input type="text" id="nameInput" placeholder="Ex: Lucas" maxlength="20" required>
-      </div>
-
-      <button id="btnJoinRoom" class="btn-join">
+      <button type="button" class="btn btn-primary" id="btn-enter" onclick="enterRoom()">
         🚀 Entrar na Sala
       </button>
     </div>
+  </div>
 
-    <div id="callScreen" class="hidden">
-      <div class="stage-container">
-        <!-- CENTRO: OME.TV | 4 PONTAS: AMIGOS DA SALA -->
-        <video id="masterBroadcastVideo" autoplay playsinline></video>
-
-        <div class="top-bar">
-          <div class="live-badge">
-            <span class="live-dot"></span>
-            <span>OME.TV AO VIVO</span>
-          </div>
-          <div class="status-badge">
-            🟢 Sala 4-Pontas Ativa
-          </div>
+  <!-- ==================== TELA 2: SALA PRINCIPAL ==================== -->
+  <div id="room-screen">
+    <header class="topbar">
+      <div class="topbar-left">
+        <div class="brand-title">MultiCam <span>Studio</span></div>
+        <div class="room-pill">
+          Sala: <span id="display-room-code">---</span>
         </div>
       </div>
 
-      <div class="floating-bottom-bar">
-        <button id="btnToggleMic" class="ctrl-btn" title="Mutar/Desmutar Microfone">
-          🎤
-        </button>
-
-        <button id="btnToggleCam" class="ctrl-btn" title="Ligar/Desligar Câmera">
-          📹
-        </button>
-
-        <button id="btnFlipCam" class="ctrl-btn" title="Virar Câmera (Frente/Trás)">
-          🔄
-        </button>
-
-        <button id="btnLeaveRoom" class="ctrl-btn btn-leave" title="Sair da Chamada">
-          🚪
-        </button>
+      <div class="topbar-actions">
+        <button class="btn btn-secondary btn-sm" onclick="copyInviteLink()">📋 Copiar Convite</button>
+        <button class="btn btn-secondary btn-sm" style="color: var(--danger);" onclick="leaveRoom()">🚪 Sair</button>
       </div>
-    </div>
+    </header>
+
+    <main class="workspace">
+      <!-- PALCO CENTRAL: OME.TV / OMEGLE (100% FIEL À RESOLUÇÃO NATIVA) -->
+      <section class="center-stage">
+        <div class="stage-label">
+          <span class="live-dot"></span>
+          <span id="center-title">Ome.tv / Transmissão Principal</span>
+          <span class="res-tag" id="center-res">0x0 (Nativo)</span>
+        </div>
+
+        <div class="native-video-wrapper">
+          <video id="center-video" autoplay playsinline muted></video>
+        </div>
+
+        <div class="stage-controls">
+          <button class="ctrl-btn" id="btn-capture-ometv" onclick="captureOmeTvTab()">
+            🖥️ Capturar Aba Ome.tv
+          </button>
+          <button class="ctrl-btn" id="btn-toggle-mic" onclick="toggleMic()">
+            🎤 Mic: ON
+          </button>
+          <button class="ctrl-btn" id="btn-toggle-cam" onclick="toggleCam()">
+            📹 Cam: ON
+          </button>
+          <button class="ctrl-btn" id="btn-mirror" onclick="toggleMirror()">
+            🔄 Espelhar
+          </button>
+        </div>
+      </section>
+
+      <!-- LATERAL DIREITA: 4 SLOTS VERTICAIS DE CÂMERAS -->
+      <aside class="friends-sidebar" id="slots-container">
+        <!-- Slot 0: Você -->
+        <div class="cam-slot" id="slot-0">
+          <div class="slot-empty">
+            <span>Lacuna 1 (Você)</span>
+          </div>
+        </div>
+
+        <!-- Slot 1: Amigo 1 -->
+        <div class="cam-slot" id="slot-1">
+          <div class="slot-empty">
+            <span>Lacuna 2 • Vazia</span>
+            <button class="btn btn-secondary btn-sm" onclick="copyInviteLink()">+ Convidar</button>
+          </div>
+        </div>
+
+        <!-- Slot 2: Amigo 2 -->
+        <div class="cam-slot" id="slot-2">
+          <div class="slot-empty">
+            <span>Lacuna 3 • Vazia</span>
+            <button class="btn btn-secondary btn-sm" onclick="copyInviteLink()">+ Convidar</button>
+          </div>
+        </div>
+
+        <!-- Slot 3: Amigo 3 -->
+        <div class="cam-slot" id="slot-3">
+          <div class="slot-empty">
+            <span>Lacuna 4 • Vazia</span>
+            <button class="btn btn-secondary btn-sm" onclick="copyInviteLink()">+ Convidar</button>
+          </div>
+        </div>
+      </aside>
+    </main>
   </div>
 
-  <script>
-    const lobbyScreen = document.getElementById('lobbyScreen');
-    const callScreen = document.getElementById('callScreen');
-    const lobbyVideo = document.getElementById('lobbyVideo');
-    const masterBroadcastVideo = document.getElementById('masterBroadcastVideo');
-    const roomInput = document.getElementById('roomInput');
-    const nameInput = document.getElementById('nameInput');
-    const btnJoinRoom = document.getElementById('btnJoinRoom');
-    const btnToggleMic = document.getElementById('btnToggleMic');
-    const btnToggleCam = document.getElementById('btnToggleCam');
-    const btnFlipCam = document.getElementById('btnFlipCam');
-    const btnLeaveRoom = document.getElementById('btnLeaveRoom');
+  <div id="toast">Link copiado!</div>
 
+  <script>
     let localStream = null;
     let peer = null;
-    let currentCall = null;
-    let currentFacingMode = 'user';
-    let isMicMuted = false;
-    let isCamOff = false;
+    let myPeerId = null;
+    let activeRoomCode = '';
+    let myUsername = 'Participante';
+    let isMirrored = true;
+    let micEnabled = true;
+    let camEnabled = true;
+
+    // Mapa de slots de amigos conectados: slotIndex (1..3) -> { peerId, call, stream, username }
+    const connectedSlots = new Map();
+
+    const PEER_CONFIG = {
+      debug: 1,
+      config: {
+        iceServers: [
+          { urls: 'stun:stun.l.google.com:19302' },
+          { urls: 'stun:stun1.l.google.com:19302' },
+          { urls: 'stun:stun2.l.google.com:19302' },
+          { urls: 'stun:stun.cloudflare.com:3478' }
+        ]
+      }
+    };
+
+    window.addEventListener('DOMContentLoaded', () => {
+      initUrlParams();
+      startLobbyCamera();
+    });
 
     function initUrlParams() {
       const params = new URLSearchParams(window.location.search);
-      const room = params.get('room') || params.get('id');
-      if (room) {
-        roomInput.value = room;
-        roomInput.readOnly = true;
+      const roomParam = params.get('room');
+      if (roomParam) {
+        document.getElementById('room-input').value = sanitizeCode(roomParam);
+      } else {
+        generateNewCode();
       }
-      const savedName = localStorage.getItem('multicam_guest_name');
-      if (savedName) nameInput.value = savedName;
+
+      const savedName = localStorage.getItem('multicam_studio_name');
+      if (savedName) {
+        document.getElementById('username-input').value = savedName;
+      }
     }
 
-    async function startCamera(facingMode = 'user') {
-      if (localStream) {
-        localStream.getTracks().forEach(t => t.stop());
-      }
+    function sanitizeCode(str) {
+      return str.trim().replace(/[^a-zA-Z0-9_-]/g, '').toUpperCase();
+    }
+
+    function generateNewCode() {
+      const num = Math.floor(1000 + Math.random() * 9000);
+      const code = `DUO-${num}`;
+      document.getElementById('room-input').value = code;
+    }
+
+    function getShareableLink() {
+      const raw = document.getElementById('room-input').value || 'DUO-1000';
+      const code = sanitizeCode(raw);
+      const base = window.location.origin + window.location.pathname;
+      return `${base}?room=${encodeURIComponent(code)}`;
+    }
+
+    function copyInviteLink() {
+      const link = getShareableLink();
+      navigator.clipboard.writeText(link).then(() => {
+        showToast('Link da sala copiado! Envie aos amigos.');
+      });
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2600);
+    }
+
+    async function startLobbyCamera() {
       try {
-        const stream = await navigator.mediaDevices.getUserMedia({
+        localStream = await navigator.mediaDevices.getUserMedia({
           video: {
-            facingMode: facingMode,
-            width: { ideal: 1280 },
-            height: { ideal: 720 }
+            width: { ideal: 1920 },
+            height: { ideal: 1080 }
           },
           audio: {
             echoCancellation: true,
@@ -335,143 +739,264 @@
           }
         });
 
-        localStream = stream;
-        lobbyVideo.srcObject = stream;
-        currentFacingMode = facingMode;
-
-        localStream.getAudioTracks().forEach(t => (t.enabled = !isMicMuted));
-        localStream.getVideoTracks().forEach(t => (t.enabled = !isCamOff));
-        return stream;
+        const preview = document.getElementById('lobby-preview');
+        preview.srcObject = localStream;
+        preview.onloadedmetadata = () => {
+          document.getElementById('lobby-res').textContent = `${preview.videoWidth}x${preview.videoHeight} (Nativo)`;
+        };
       } catch (err) {
-        console.error('Falha câmera:', err);
-        throw err;
+        console.warn('Webcam não iniciada no lobby:', err);
+        document.getElementById('lobby-res').textContent = 'Sem câmera detectada';
       }
     }
 
-    async function joinRoom() {
-      const roomId = roomInput.value.trim();
-      const guestName = nameInput.value.trim() || 'Convidado';
+    async function enterRoom() {
+      const rawRoom = document.getElementById('room-input').value.trim();
+      myUsername = document.getElementById('username-input').value.trim() || 'Convidado';
 
-      if (!roomId) {
-        alert('Informe o ID da sala!');
+      if (!rawRoom) {
+        showToast('Informe o código da sala!');
         return;
       }
 
-      localStorage.setItem('multicam_guest_name', guestName);
-      btnJoinRoom.disabled = true;
-      btnJoinRoom.textContent = 'Conectando à Sala...';
+      activeRoomCode = sanitizeCode(rawRoom);
+      localStorage.setItem('multicam_studio_name', myUsername);
 
-      try {
-        if (!localStream) {
-          await startCamera(currentFacingMode);
-        }
+      const btn = document.getElementById('btn-enter');
+      btn.disabled = true;
+      btn.textContent = 'Conectando WebRTC...';
 
-        const guestPeerId = 'guest-' + Math.random().toString(36).substring(2, 9);
-        peer = new Peer(guestPeerId, {
-          debug: 1,
-          config: {
-            iceServers: [
-              { urls: 'stun:stun.l.google.com:19302' },
-              { urls: 'stun:stun1.l.google.com:19302' },
-              { urls: 'stun:stun2.l.google.com:19302' },
-              { urls: 'stun:stun.cloudflare.com:3478' }
-            ]
+      const newUrl = `${window.location.pathname}?room=${encodeURIComponent(activeRoomCode)}`;
+      window.history.replaceState({}, '', newUrl);
+      document.getElementById('display-room-code').textContent = activeRoomCode;
+
+      if (!localStream) {
+        try {
+          await startLobbyCamera();
+        } catch (e) {}
+      }
+
+      // Slot 0 (Você) na barra lateral direita com resolução real nativa
+      if (localStream) {
+        attachStreamToSlot(0, localStream, `${myUsername} (Você)`, true, isMirrored);
+
+        const centerVideo = document.getElementById('center-video');
+        centerVideo.srcObject = localStream;
+        centerVideo.classList.toggle('mirrored', isMirrored);
+        centerVideo.onloadedmetadata = () => {
+          document.getElementById('center-res').textContent = `${centerVideo.videoWidth}x${centerVideo.videoHeight} (Nativo)`;
+        };
+      }
+
+      initPeerConnection();
+    }
+
+    function initPeerConnection() {
+      myPeerId = `mc-${activeRoomCode.toLowerCase()}-${Math.random().toString(36).substring(2, 8)}`;
+      peer = new Peer(myPeerId, PEER_CONFIG);
+
+      peer.on('open', (id) => {
+        console.log('[MultiCam] Conectado ao PeerServer ID:', id);
+        document.getElementById('lobby-screen').classList.add('hidden');
+        showToast(`Conectado à sala ${activeRoomCode}!`);
+        connectToRoomHost();
+      });
+
+      peer.on('call', (call) => {
+        console.log('[MultiCam] Chamada recebida de:', call.peer);
+        call.answer(localStream || undefined);
+
+        call.on('stream', (remoteStream) => {
+          console.log('[MultiCam] Stream remoto recebido de:', call.peer);
+          const friendName = (call.metadata && call.metadata.username) || `Amigo (${call.peer.substring(call.peer.length - 4)})`;
+          assignFriendToNextFreeSlot(call.peer, remoteStream, friendName, call);
+        });
+
+        call.on('close', () => removeFriendByPeerId(call.peer));
+        call.on('error', () => removeFriendByPeerId(call.peer));
+      });
+
+      peer.on('connection', (conn) => {
+        conn.on('data', (data) => {
+          if (data && data.type === 'PEER_INFO') {
+            updateSlotName(conn.peer, data.username);
           }
         });
+      });
 
-        peer.on('open', (id) => {
-          console.log('Conectado com Peer ID:', id);
+      peer.on('error', (err) => {
+        console.warn('[MultiCam] Aviso PeerJS:', err.type);
+      });
+    }
 
-          const conn = peer.connect(roomId);
-          conn.on('open', () => {
-            conn.send({ type: 'GUEST_JOIN', name: guestName });
-          });
+    function connectToRoomHost() {
+      const hostPeerId = `host-${activeRoomCode.toLowerCase()}`;
 
-          // Chamada direta com o Host
-          const call = peer.call(roomId, localStream);
-          currentCall = call;
+      const conn = peer.connect(hostPeerId);
+      conn.on('open', () => {
+        conn.send({ type: 'PEER_INFO', username: myUsername });
+      });
 
-          // Recebe o Master Broadcast (Centro Ome.tv + 4 Pontas Amigos)
-          call.on('stream', (stream) => {
-            console.log('Master Broadcast recebido com sucesso!', stream);
-            masterBroadcastVideo.srcObject = stream;
-            masterBroadcastVideo.play().catch(() => {});
-            lobbyScreen.classList.add('hidden');
-            callScreen.classList.remove('hidden');
-          });
-
-          call.on('close', () => {
-            alert('A chamada foi encerrada.');
-            leaveRoom();
-          });
-
-          call.on('error', (err) => {
-            console.error('Erro chamada:', err);
-            btnJoinRoom.disabled = false;
-            btnJoinRoom.textContent = '🚀 Entrar na Sala';
-          });
+      if (localStream) {
+        const call = peer.call(hostPeerId, localStream, {
+          metadata: { username: myUsername }
         });
 
-        peer.on('error', (err) => {
-          console.error('Erro PeerJS:', err);
-          btnJoinRoom.disabled = false;
-          btnJoinRoom.textContent = '🚀 Entrar na Sala';
+        call.on('stream', (remoteStream) => {
+          assignFriendToNextFreeSlot(hostPeerId, remoteStream, 'Host da Sala', call);
         });
-
-      } catch (err) {
-        console.error('Erro geral:', err);
-        btnJoinRoom.disabled = false;
-        btnJoinRoom.textContent = '🚀 Entrar na Sala';
+        call.on('close', () => removeFriendByPeerId(hostPeerId));
       }
     }
 
-    btnToggleMic.addEventListener('click', () => {
-      if (!localStream) return;
-      isMicMuted = !isMicMuted;
-      localStream.getAudioTracks().forEach(t => (t.enabled = !isMicMuted));
-      btnToggleMic.classList.toggle('off', isMicMuted);
-    });
-
-    btnToggleCam.addEventListener('click', () => {
-      if (!localStream) return;
-      isCamOff = !isCamOff;
-      localStream.getVideoTracks().forEach(t => (t.enabled = !isCamOff));
-      btnToggleCam.classList.toggle('off', isCamOff);
-    });
-
-    btnFlipCam.addEventListener('click', async () => {
-      const nextMode = currentFacingMode === 'user' ? 'environment' : 'user';
-      try {
-        await startCamera(nextMode);
-        if (currentCall && currentCall.peerConnection) {
-          const senders = currentCall.peerConnection.getSenders();
-          const videoSender = senders.find(s => s.track && s.track.kind === 'video');
-          const newVideoTrack = localStream.getVideoTracks()[0];
-          if (videoSender && newVideoTrack) {
-            videoSender.replaceTrack(newVideoTrack);
-          }
+    function assignFriendToNextFreeSlot(peerId, stream, name, call) {
+      for (const [slotIdx, data] of connectedSlots.entries()) {
+        if (data.peerId === peerId) {
+          attachStreamToSlot(slotIdx, stream, name, false, false);
+          return;
         }
-      } catch (e) {
-        console.warn('Não foi possível alternar câmera:', e);
       }
-    });
+
+      for (let i = 1; i <= 3; i++) {
+        if (!connectedSlots.has(i)) {
+          connectedSlots.set(i, { peerId, stream, username: name, call });
+          attachStreamToSlot(i, stream, name, false, false);
+          return;
+        }
+      }
+    }
+
+    function removeFriendByPeerId(peerId) {
+      for (const [slotIdx, data] of connectedSlots.entries()) {
+        if (data.peerId === peerId) {
+          connectedSlots.delete(slotIdx);
+          resetSlotToEmpty(slotIdx);
+          break;
+        }
+      }
+    }
+
+    function updateSlotName(peerId, name) {
+      for (const [slotIdx, data] of connectedSlots.entries()) {
+        if (data.peerId === peerId) {
+          data.username = name;
+          const badge = document.querySelector(`#slot-${slotIdx} .slot-badge strong`);
+          if (badge) badge.textContent = name;
+          break;
+        }
+      }
+    }
+
+    function attachStreamToSlot(slotIndex, stream, label, isMuted = false, mirror = false) {
+      const slot = document.getElementById(`slot-${slotIndex}`);
+      if (!slot) return;
+
+      slot.innerHTML = '';
+      slot.classList.add('active-slot');
+
+      const video = document.createElement('video');
+      video.srcObject = stream;
+      video.autoplay = true;
+      video.playsInline = true;
+      video.muted = isMuted;
+      if (mirror) video.classList.add('mirrored');
+
+      const badge = document.createElement('div');
+      badge.className = 'slot-badge';
+      badge.innerHTML = `<strong>${escapeHtml(label)}</strong><span class="res-tag">Detectando...</span>`;
+
+      video.onloadedmetadata = () => {
+        badge.querySelector('.res-tag').textContent = `${video.videoWidth}x${video.videoHeight}`;
+      };
+
+      slot.appendChild(video);
+      slot.appendChild(badge);
+    }
+
+    function resetSlotToEmpty(slotIndex) {
+      const slot = document.getElementById(`slot-${slotIndex}`);
+      if (!slot) return;
+
+      slot.classList.remove('active-slot');
+      slot.innerHTML = `
+        <div class="slot-empty">
+          <span>Lacuna ${slotIndex + 1} • Vazia</span>
+          <button class="btn btn-secondary btn-sm" onclick="copyInviteLink()">+ Convidar</button>
+        </div>
+      `;
+    }
+
+    async function captureOmeTvTab() {
+      try {
+        const displayStream = await navigator.mediaDevices.getDisplayMedia({
+          video: {
+            cursor: 'never',
+            displaySurface: 'browser'
+          },
+          audio: true
+        });
+
+        const centerVideo = document.getElementById('center-video');
+        centerVideo.srcObject = displayStream;
+        centerVideo.muted = false;
+        centerVideo.classList.remove('mirrored');
+
+        document.getElementById('center-title').textContent = 'Ome.tv / Omegle Ao Vivo';
+
+        centerVideo.onloadedmetadata = () => {
+          document.getElementById('center-res').textContent = `${centerVideo.videoWidth}x${centerVideo.videoHeight} (100% Nativo)`;
+        };
+
+        displayStream.getVideoTracks()[0].onended = () => {
+          document.getElementById('center-title').textContent = 'Ome.tv / Transmissão Principal';
+          document.getElementById('center-res').textContent = 'Finalizado';
+        };
+
+        showToast('Aba do Ome.tv capturada no centro!');
+      } catch (err) {
+        showToast('Captura de aba cancelada.');
+      }
+    }
+
+    function toggleMic() {
+      if (!localStream) return;
+      micEnabled = !micEnabled;
+      localStream.getAudioTracks().forEach(t => t.enabled = micEnabled);
+      const btn = document.getElementById('btn-toggle-mic');
+      btn.textContent = micEnabled ? '🎤 Mic: ON' : '🔇 Mic: OFF';
+      btn.classList.toggle('active-danger', !micEnabled);
+    }
+
+    function toggleCam() {
+      if (!localStream) return;
+      camEnabled = !camEnabled;
+      localStream.getVideoTracks().forEach(t => t.enabled = camEnabled);
+      const btn = document.getElementById('btn-toggle-cam');
+      btn.textContent = camEnabled ? '📹 Cam: ON' : '🚫 Cam: OFF';
+      btn.classList.toggle('active-danger', !camEnabled);
+    }
+
+    function toggleMirror() {
+      isMirrored = !isMirrored;
+      const slot0Video = document.querySelector('#slot-0 video');
+      if (slot0Video) slot0Video.classList.toggle('mirrored', isMirrored);
+    }
 
     function leaveRoom() {
-      if (currentCall) { try { currentCall.close(); } catch (e) {} }
-      if (peer) { try { peer.destroy(); } catch (e) {} }
-      callScreen.classList.add('hidden');
-      lobbyScreen.classList.remove('hidden');
-      btnJoinRoom.disabled = false;
-      btnJoinRoom.textContent = '🚀 Entrar na Sala';
+      if (localStream) {
+        localStream.getTracks().forEach(t => t.stop());
+      }
+      if (peer) {
+        try { peer.destroy(); } catch (e) {}
+      }
+      location.reload();
     }
 
-    btnLeaveRoom.addEventListener('click', leaveRoom);
-    btnJoinRoom.addEventListener('click', joinRoom);
-
-    window.addEventListener('DOMContentLoaded', () => {
-      initUrlParams();
-      startCamera('user').catch(() => {});
-    });
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
   </script>
 </body>
 </html>
