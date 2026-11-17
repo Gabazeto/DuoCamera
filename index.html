@@ -85,7 +85,6 @@
       color: var(--text-muted);
     }
 
-    /* Banner informativo quando o usuário entra com link pronto */
     .room-invite-pill {
       display: flex;
       align-items: center;
@@ -237,6 +236,15 @@
       font-family: monospace;
     }
 
+    .room-limit-badge {
+      font-size: 11px;
+      background: rgba(16, 185, 129, 0.12);
+      color: var(--success);
+      padding: 2px 7px;
+      border-radius: 4px;
+      border: 1px solid rgba(16, 185, 129, 0.25);
+    }
+
     .topbar-actions {
       display: flex;
       align-items: center;
@@ -268,7 +276,7 @@
       border-color: rgba(239, 68, 68, 0.3);
     }
 
-    /* Layout: Palco + Barra Lateral */
+    /* Layout: Palco Central + Barra Lateral */
     .studio-layout {
       flex: 1;
       display: flex;
@@ -278,7 +286,7 @@
       overflow: hidden;
     }
 
-    /* Palco Central (Ome.tv Stranger / Omegle) */
+    /* Palco Central (Ome.tv / Omegle) */
     .stage-container {
       flex: 1;
       background: #000;
@@ -323,52 +331,7 @@
       background: #000;
     }
 
-    /* Standby overlay quando ainda não há parceiro no Ome.tv */
-    .stage-standby {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      background: #0a0d13;
-      padding: 20px;
-      z-index: 5;
-    }
-
-    .stage-standby.hidden {
-      display: none;
-    }
-
-    .standby-spinner {
-      width: 36px;
-      height: 36px;
-      border: 3px solid rgba(255, 255, 255, 0.1);
-      border-top-color: var(--primary);
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-      margin-bottom: 14px;
-    }
-
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-
-    .stage-standby h3 {
-      font-size: 16px;
-      font-weight: 600;
-      color: #fff;
-      margin-bottom: 4px;
-    }
-
-    .stage-standby p {
-      font-size: 13px;
-      color: var(--text-muted);
-      max-width: 380px;
-    }
-
-    /* Barra de Controles do Palco */
+    /* Controles do Palco */
     .stage-controls {
       position: absolute;
       bottom: 16px;
@@ -408,7 +371,7 @@
       color: #fca5a5;
     }
 
-    /* Barra Lateral de Câmeras (4 Slots Verticais) */
+    /* Barra Lateral de Câmeras (Exatamente 4 Vagas no total) */
     .sidebar-cams {
       width: 290px;
       display: flex;
@@ -490,7 +453,6 @@
       background: rgba(255, 255, 255, 0.14);
     }
 
-    /* Notificação Toast */
     .toast-popup {
       position: fixed;
       bottom: 20px;
@@ -584,16 +546,17 @@
         <div class="room-tag">
           Sala: <strong id="lblActiveRoom">---</strong>
         </div>
+        <span class="room-limit-badge">Máx. 4 Pessoas</span>
       </div>
 
       <div class="topbar-actions">
-        <button class="btn-action" onclick="copyInviteLink()">📋 Copiar Link</button>
-        <button class="btn-action btn-leave" onclick="leaveRoom()">Sair da Sala</button>
+        <button type="button" class="btn-action" onclick="copyInviteLink()">📋 Copiar Link</button>
+        <button type="button" class="btn-action btn-leave" onclick="leaveRoom()">Sair da Sala</button>
       </div>
     </header>
 
     <main class="studio-layout">
-      <!-- Palco Central: Ome.tv / Omegle (100% nativo) -->
+      <!-- Palco Central: Ome.tv / Omegle -->
       <section class="stage-container">
         <div class="stage-header">
           <span class="live-dot"></span>
@@ -602,28 +565,21 @@
 
         <video id="stage-video" autoplay playsinline></video>
 
-        <!-- Standby enquanto o Host procura parceiro no Ome.tv -->
-        <div class="stage-standby" id="stageStandby">
-          <div class="standby-spinner"></div>
-          <h3>Aguardando conexão no Ome.tv...</h3>
-          <p>Assim que o Host der match com alguém no Ome.tv, a pessoa aparecerá aqui com som em tempo real.</p>
-        </div>
-
         <!-- Controles do Palco -->
         <div class="stage-controls">
-          <button class="ctrl-button" id="btnMic" onclick="toggleMic()">
+          <button type="button" class="ctrl-button" id="btnMic" onclick="toggleMic()">
             🎤 Mic: Ligado
           </button>
-          <button class="ctrl-button" id="btnCam" onclick="toggleCam()">
+          <button type="button" class="ctrl-button" id="btnCam" onclick="toggleCam()">
             📹 Câmera: Ligada
           </button>
-          <button class="ctrl-button" id="btnMirror" onclick="toggleMirror()">
+          <button type="button" class="ctrl-button" id="btnMirror" onclick="toggleMirror()">
             🔄 Espelhar
           </button>
         </div>
       </section>
 
-      <!-- Barra Lateral Direita: 4 Slots de Câmeras -->
+      <!-- Barra Lateral Direita: Exatamente 4 Slots -->
       <aside class="sidebar-cams">
         <!-- Slot 0: Você -->
         <div class="cam-tile" id="slot-0">
@@ -644,7 +600,7 @@
         <div class="cam-tile" id="slot-2">
           <div class="cam-empty">
             <span>Vaga 3 (Vazia)</span>
-            <button class="btn-invite-slot" onclick="copyInviteLink()">+ Convidar</button>
+            <button type="button" class="btn-invite-slot" onclick="copyInviteLink()">+ Convidar</button>
           </div>
         </div>
 
@@ -652,7 +608,7 @@
         <div class="cam-tile" id="slot-3">
           <div class="cam-empty">
             <span>Vaga 4 (Vazia)</span>
-            <button class="btn-invite-slot" onclick="copyInviteLink()">+ Convidar</button>
+            <button type="button" class="btn-invite-slot" onclick="copyInviteLink()">+ Convidar</button>
           </div>
         </div>
       </aside>
@@ -682,8 +638,9 @@
       let micEnabled = true;
       let camEnabled = true;
 
-      // Mapa de Slots: slotIdx (0..3) -> { peerId, stream, name }
-      const slotMap = new Map();
+      // Exatamente 4 slots fixos:
+      // Slot 0: Você | Slot 1: Host | Slot 2: Amigo 2 | Slot 3: Amigo 3
+      const slotMap = new Map(); // slotIdx (0..3) -> { peerId, stream, name }
       const meshConnections = new Map(); // peerId -> call
 
       window.addEventListener('DOMContentLoaded', () => {
@@ -706,12 +663,11 @@
         if (roomParam) {
           activeRoomCode = cleanCode(roomParam);
           roomInput.value = activeRoomCode;
-          // Se já tem o link com a sala, esconde o campo de sala manual!
+          // Se já tem link com sala, esconde o campo e mostra o selo
           manualGroup.style.display = 'none';
           inviteBanner.style.display = 'flex';
           bannerRoomCode.textContent = activeRoomCode.toUpperCase();
         } else {
-          // Não tem link: mostra opção manual
           manualGroup.style.display = 'block';
           inviteBanner.style.display = 'none';
           generateNewRoomCode();
@@ -733,13 +689,40 @@
         activeRoomCode = code;
       };
 
+      /**
+       * Copia o link fixo da sala ativa SEM gerar novos códigos
+       */
       window.copyInviteLink = function () {
+        if (!activeRoomCode) return;
+
         const base = window.location.origin + window.location.pathname;
         const link = `${base}?room=${encodeURIComponent(activeRoomCode)}`;
-        navigator.clipboard.writeText(link).then(() => {
-          showToast('Link copiado! Envie para seus amigos.');
-        });
+
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(link)
+            .then(() => showToast('Link copiado! Envie para seus amigos.'))
+            .catch(() => fallbackCopy(link));
+        } else {
+          fallbackCopy(link);
+        }
       };
+
+      function fallbackCopy(text) {
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position = 'fixed';
+        ta.style.left = '-9999px';
+        document.body.appendChild(ta);
+        ta.focus();
+        ta.select();
+        try {
+          document.execCommand('copy');
+          showToast('Link copiado! Envie para seus amigos.');
+        } catch (e) {
+          prompt('Copie o link abaixo:', text);
+        }
+        document.body.removeChild(ta);
+      }
 
       function showToast(msg) {
         const toast = document.getElementById('toast');
@@ -750,7 +733,7 @@
       }
 
       /**
-       * Pede permissão de câmera e microfone e entra na sala
+       * Solicita permissão e entra na sala
        */
       window.handleEnterRoom = async function () {
         const nameInput = document.getElementById('usernameInput');
@@ -775,7 +758,6 @@
         btnEnter.textContent = 'Solicitando câmera e microfone...';
 
         try {
-          // Solicitação explícita de permissão do navegador
           localStream = await navigator.mediaDevices.getUserMedia({
             video: {
               width: { ideal: 1280 },
@@ -800,10 +782,15 @@
         document.getElementById('lobby-screen').classList.add('hidden');
         document.getElementById('lblActiveRoom').textContent = activeRoomCode.toUpperCase();
 
-        // Aloca Slot 0 para a câmera local
+        // Atualiza a barra de endereço para o link exato da sala
+        const cleanUrl = `${window.location.origin}${window.location.pathname}?room=${encodeURIComponent(activeRoomCode)}`;
+        window.history.replaceState({}, '', cleanUrl);
+
+        // Aloca Slot 0 (Você)
+        slotMap.set(0, { peerId: 'local', stream: localStream, name: `${myUsername} (Você)` });
         attachStreamToSlot(0, localStream, `${myUsername} (Você)`, true, isMirrored);
 
-        // Inicializa PeerJS
+        // Inicia PeerJS
         startPeerSession();
       };
 
@@ -825,21 +812,20 @@
           connectToHost();
         });
 
-        // Recebe chamadas de vídeo
         peer.on('call', (incomingCall) => {
           console.log('[MultiCam] Chamada recebida:', incomingCall.peer, incomingCall.metadata);
 
-          // 1. Chamada do Palco Central do Ome.tv
+          // 1. Palco Central do Ome.tv (Pessoa do Ome.tv com áudio)
           if (incomingCall.metadata && incomingCall.metadata.type === 'ometv-stage') {
             incomingCall.answer();
             incomingCall.on('stream', (stageStream) => {
-              console.log('[MultiCam] Feed do Ome.tv recebido com sucesso!');
+              console.log('[MultiCam] Feed do Palco Central recebido!');
               attachOmeStage(stageStream);
             });
             return;
           }
 
-          // 2. Chamada de outro Amigo via Mesh
+          // 2. Chamada de outro amigo via Mesh (respeita limite de 4 participantes)
           incomingCall.answer(localStream);
           incomingCall.on('stream', (friendStream) => {
             const name = (incomingCall.metadata && incomingCall.metadata.name) || `Amigo (${incomingCall.peer.substring(incomingCall.peer.length - 4)})`;
@@ -872,6 +858,13 @@
         });
 
         conn.on('data', (data) => {
+          if (data && data.type === 'ROOM_FULL') {
+            alert('⚠️ Sala Cheia! A sala atingiu o limite de 4 pessoas (1 Host + 3 Amigos).');
+            if (peer) peer.destroy();
+            window.location.href = window.location.pathname;
+            return;
+          }
+
           if (data && data.type === 'ROOM_PARTICIPANTS') {
             handleParticipantsMesh(data.participants);
           }
@@ -885,38 +878,53 @@
 
           call.on('stream', (hostStream) => {
             console.log('[MultiCam] Câmera do Host recebida!');
+            slotMap.set(1, { peerId: hostPeerId, stream: hostStream, name: 'Host (Ome.tv)' });
             attachStreamToSlot(1, hostStream, 'Host (Ome.tv)', false, false);
           });
 
           call.on('close', () => {
             removeSlot(1);
-            showToast('Host desconectou.');
+            showToast('Host encerrou a transmissão.');
           });
         }
       }
 
       /**
-       * Anexa a transmissão do Ome.tv no Palco Central
+       * Anexa a transmissão contínua do Ome.tv no Palco Central
        */
       function attachOmeStage(stageStream) {
         const video = document.getElementById('stage-video');
-        const standby = document.getElementById('stageStandby');
-
         if (!video) return;
-        video.srcObject = stageStream;
-        video.play().catch(() => {});
 
-        if (standby) standby.classList.add('hidden');
+        video.srcObject = stageStream;
+        video.muted = false; // Áudio do estranho ligado
+        video.play().catch(() => {
+          // Fallback se o navegador bloquear autoplay com som
+          video.muted = true;
+          video.play().catch(() => {});
+        });
+
         document.getElementById('stageTitle').textContent = 'Ome.tv Ao Vivo';
       }
 
+      // Desmuta o áudio ao primeiro clique do usuário no palco
+      document.addEventListener('click', () => {
+        const video = document.getElementById('stage-video');
+        if (video && video.srcObject && video.muted) {
+          video.muted = false;
+        }
+      }, { once: true });
+
       /**
-       * Gerencia a malha (Mesh) entre amigos
+       * Malha Mesh entre amigos (Estritamente até 4 pessoas na sala)
        */
       function handleParticipantsMesh(participants) {
         if (!Array.isArray(participants)) return;
 
-        participants.forEach((p) => {
+        // Limita a malha para no máximo 4 participantes (Host + 3 amigos)
+        const validParticipants = participants.slice(0, 4);
+
+        validParticipants.forEach((p) => {
           if (p.isHost || p.peerId === myPeerId) return;
 
           if (p.peerId < myPeerId && !meshConnections.has(p.peerId)) {
@@ -939,14 +947,21 @@
         });
       }
 
+      /**
+       * Aloca um amigo nos slots 2 ou 3 (nunca cria slots extras)
+       */
       function assignFriendSlot(peerId, stream, name) {
+        // Se já existe nesse slot, só atualiza o vídeo sem duplicar
         for (const [slotIdx, data] of slotMap.entries()) {
           if (data.peerId === peerId) {
+            data.stream = stream;
+            data.name = name;
             attachStreamToSlot(slotIdx, stream, name, false, false);
             return;
           }
         }
 
+        // Procura vaga livre apenas entre os slots 2 e 3
         for (let i = 2; i <= 3; i++) {
           if (!slotMap.has(i)) {
             slotMap.set(i, { peerId, stream, name });
@@ -996,7 +1011,7 @@
         slotEl.innerHTML = `
           <div class="cam-empty">
             <span>${labels[slotIdx]}</span>
-            ${slotIdx >= 2 ? '<button class="btn-invite-slot" onclick="copyInviteLink()">+ Convidar</button>' : ''}
+            ${slotIdx >= 2 ? '<button type="button" class="btn-invite-slot" onclick="copyInviteLink()">+ Convidar</button>' : ''}
           </div>
         `;
       }
@@ -1018,7 +1033,7 @@
         const btn = document.getElementById('btnMic');
         btn.classList.toggle('off', !micEnabled);
         btn.textContent = micEnabled ? '🎤 Mic: Ligado' : '🔇 Mic: Mutado';
-        showToast(micEnabled ? 'Microfone ativado' : 'Microfone mutado');
+        showToast(micEnabled ? 'Microfone ligado' : 'Microfone mutado');
       };
 
       window.toggleCam = function () {
