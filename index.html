@@ -3,38 +3,627 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>MultiCam Studio • Ome.tv Collab</title>
+  <title>MultiCam Studio • Ome.tv & Amigos</title>
+  <!-- PeerJS para WebRTC P2P -->
   <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
   <style>
     :root {
-      --bg-dark: #090b10;
-      --panel-bg: rgba(18, 22, 33, 0.82);
-      --border-glass: rgba(255, 255, 255, 0.1);
-      --border-neon: rgba(0, 240, 255, 0.35);
+      --bg-dark: #07080d;
+      --panel-bg: rgba(14, 18, 28, 0.85);
+      --border-glass: rgba(255, 255, 255, 0.08);
+      --border-neon: rgba(0, 240, 255, 0.3);
       --accent-cyan: #00f0ff;
-      --accent-purple: #8a2be2;
-      --text-main: #f1f5f9;
+      --accent-purple: #8b5cf6;
+      --accent-magenta: #ec4899;
+      --text-main: #f8fafc;
       --text-muted: #94a3b8;
       --danger: #ef4444;
       --success: #10b981;
     }
+
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
       -webkit-font-smoothing: antialiased;
     }
+
     body {
-      background: radial-gradient(circle at top left, #141a30 0%, var(--bg-dark) 55%, #040507 100%);
+      background: radial-gradient(circle at 10% 20%, #151128 0%, var(--bg-dark) 55%, #030407 100%);
       color: var(--text-main);
       height: 100vh;
       overflow: hidden;
       display: flex;
       flex-direction: column;
     }
-    /* ================= TELA 1: MENU / LOBBY ================= */
+
+    /* ================= TELA 1: LOBBY ================= */
     #lobby-screen {
       position: fixed;
       inset: 0;
       display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 50;
+      background: radial-gradient(circle at 50% 30%, rgba(0, 240, 255, 0.08), rgba(5, 7, 10, 0.95) 75%);
+      backdrop-filter: blur(12px);
+      transition: opacity 0.35s ease, visibility 0.35s ease;
+    }
+
+    #lobby-screen.hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .lobby-card {
+      width: 100%;
+      max-width: 460px;
+      background: var(--panel-bg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--border-neon);
+      border-radius: 22px;
+      padding: 32px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.85), 0 0 35px rgba(0, 240, 255, 0.1);
+    }
+
+    .brand-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      color: var(--accent-cyan);
+      background: rgba(0, 240, 255, 0.1);
+      border: 1px solid rgba(0, 240, 255, 0.25);
+      padding: 5px 12px;
+      border-radius: 999px;
+      margin-bottom: 16px;
+    }
+
+    .lobby-card h1 {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 6px;
+      letter-spacing: -0.5px;
+    }
+
+    .lobby-card p {
+      font-size: 14px;
+      color: var(--text-muted);
+      margin-bottom: 20px;
+      line-height: 1.4;
+    }
+
+    .preview-box {
+      width: 100%;
+      height: 160px;
+      background: #05070a;
+      border: 1px solid var(--border-glass);
+      border-radius: 14px;
+      overflow: hidden;
+      margin-bottom: 18px;
+      position: relative;
+    }
+
+    .preview-box video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transform: scaleX(-1);
+    }
+
+    .preview-badge {
+      position: absolute;
+      bottom: 8px;
+      right: 8px;
+      background: rgba(0, 0, 0, 0.75);
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-size: 11px;
+      color: var(--accent-cyan);
+      border: 1px solid rgba(0, 240, 255, 0.3);
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+
+    .input-row {
+      display: flex;
+      gap: 8px;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      background: rgba(5, 7, 12, 0.85);
+      border: 1px solid var(--border-glass);
+      color: var(--text-main);
+      padding: 12px 14px;
+      border-radius: 12px;
+      font-size: 14px;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+
+    input[type="text"]:focus {
+      border-color: var(--accent-cyan);
+      box-shadow: 0 0 15px rgba(0, 240, 255, 0.2);
+    }
+
+    .btn {
+      cursor: pointer;
+      border: none;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 13.5px;
+      padding: 11px 16px;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent-cyan), #00b4d8);
+      color: #050608;
+      box-shadow: 0 10px 25px rgba(0, 240, 255, 0.3);
+      width: 100%;
+      padding: 14px;
+      font-size: 15px;
+      font-weight: 700;
+      margin-top: 6px;
+    }
+
+    .btn-primary:hover {
+      box-shadow: 0 12px 30px rgba(0, 240, 255, 0.45);
+      transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text-main);
+      border: 1px solid var(--border-glass);
+      white-space: nowrap;
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.15);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    /* ================= TELA 2: SALA PRINCIPAL ================= */
+    #room-screen {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* Barra Superior */
+    .topbar {
+      height: 52px;
+      padding: 0 20px;
+      background: rgba(11, 14, 22, 0.95);
+      border-bottom: 1px solid var(--border-glass);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      z-index: 20;
+    }
+
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .brand-title {
+      font-size: 16px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      background: linear-gradient(90deg, #fff, var(--accent-cyan));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .room-pill {
+      font-size: 12px;
+      color: var(--text-muted);
+      background: rgba(255, 255, 255, 0.06);
+      padding: 4px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--border-glass);
+    }
+
+    .room-pill strong {
+      color: var(--accent-cyan);
+    }
+
+    .topbar-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn-sm {
+      padding: 6px 12px;
+      font-size: 12px;
+      border-radius: 8px;
+    }
+
+    /* Área Principal de Trabalho (Palco Central + Sidebar) */
+    .workspace {
+      flex: 1;
+      display: flex;
+      padding: 14px;
+      gap: 14px;
+      overflow: hidden;
+      height: calc(100vh - 52px);
+    }
+
+    /* Palco Central (Ome.tv Stranger / Omegle) */
+    .center-stage {
+      flex: 1;
+      background: #020408;
+      border: 1px solid var(--border-glass);
+      border-radius: 18px;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.8);
+    }
+
+    .stage-label {
+      position: absolute;
+      top: 14px;
+      left: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(7, 9, 14, 0.85);
+      backdrop-filter: blur(8px);
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      border: 1px solid var(--border-glass);
+      z-index: 10;
+    }
+
+    .live-dot {
+      width: 8px;
+      height: 8px;
+      background: var(--danger);
+      border-radius: 50%;
+      box-shadow: 0 0 10px var(--danger);
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    .res-tag {
+      font-size: 10.5px;
+      color: var(--accent-cyan);
+      background: rgba(0, 240, 255, 0.12);
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    .native-video-wrapper {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .native-video-wrapper video {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      background: #000;
+    }
+
+    /* Controles Flutuantes do Palco */
+    .stage-controls {
+      position: absolute;
+      bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(11, 14, 22, 0.88);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--border-glass);
+      padding: 8px 14px;
+      border-radius: 999px;
+      z-index: 10;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6);
+    }
+
+    .ctrl-btn {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--border-glass);
+      color: var(--text-main);
+      padding: 8px 14px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .ctrl-btn:hover {
+      background: rgba(255, 255, 255, 0.16);
+      border-color: rgba(255, 255, 255, 0.25);
+    }
+
+    .ctrl-btn.active-off {
+      background: rgba(239, 68, 68, 0.2);
+      color: var(--danger);
+      border-color: rgba(239, 68, 68, 0.4);
+    }
+
+    /* Barra Lateral Direita: 4 Slots Verticais */
+    .friends-sidebar {
+      width: 310px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      height: 100%;
+      overflow-y: auto;
+    }
+
+    .cam-slot {
+      flex: 1;
+      min-height: 120px;
+      background: rgba(14, 18, 28, 0.9);
+      border: 1px solid var(--border-glass);
+      border-radius: 14px;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+      transition: border-color 0.2s ease;
+    }
+
+    .cam-slot.active {
+      border-color: rgba(0, 240, 255, 0.35);
+    }
+
+    .cam-slot.host-slot {
+      border-color: rgba(236, 72, 153, 0.4);
+    }
+
+    .cam-slot video {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      background: #040508;
+    }
+
+    .cam-slot video.mirrored {
+      transform: scaleX(-1);
+    }
+
+    .slot-empty {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      color: var(--text-muted);
+      font-size: 12px;
+      text-align: center;
+      padding: 12px;
+    }
+
+    .slot-badge {
+      position: absolute;
+      bottom: 8px;
+      left: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(5, 7, 10, 0.85);
+      backdrop-filter: blur(8px);
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 11px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      pointer-events: none;
+      z-index: 5;
+    }
+
+    .slot-badge strong {
+      color: #ffffff;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 120px;
+    }
+
+    /* Toast */
+    #toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--accent-cyan);
+      color: #050608;
+      font-weight: 700;
+      font-size: 13px;
+      padding: 10px 18px;
+      border-radius: 10px;
+      box-shadow: 0 10px 25px rgba(0, 240, 255, 0.35);
+      opacity: 0;
+      transform: translateY(12px);
+      transition: all 0.25s ease;
+      z-index: 100;
+      pointer-events: none;
+    }
+
+    #toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    @media (max-width: 860px) {
+      .workspace {
+        flex-direction: column;
+      }
+      .friends-sidebar {
+        width: 100%;
+        height: 220px;
+        flex-direction: row;
+      }
+      .cam-slot {
+        min-height: auto;
+        min-width: 160px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ==================== TELA 1: LOBBY ==================== -->
+  <div id="lobby-screen">
+    <div class="lobby-card">
+      <div class="brand-badge">● MultiCam Studio</div>
+      <h1>Conectar Câmeras</h1>
+      <p>Transmita colaborativamente com resolução nativa integrada ao Ome.tv / Omegle.</p>
+
+      <div class="preview-box">
+        <video id="lobby-preview" autoplay playsinline muted></video>
+        <div class="preview-badge" id="lobby-res">Aguardando câmera...</div>
+      </div>
+
+      <div class="form-group">
+        <label for="room-input">Código da Sala (Host)</label>
+        <div class="input-row">
+          <input type="text" id="room-input" placeholder="Ex: duo-ayqpcp" autocomplete="off" />
+          <button type="button" class="btn btn-secondary" onclick="generateNewCode()" title="Gerar novo código">Novo</button>
+          <button type="button" class="btn btn-secondary" onclick="copyInviteLink()">Copiar</button>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="username-input">Seu Nome / Apelido</label>
+        <input type="text" id="username-input" placeholder="Digite seu nome..." maxlength="20" />
+      </div>
+
+      <button type="button" class="btn btn-primary" id="btn-enter" onclick="enterRoom()">
+        🚀 Entrar na Sala
+      </button>
+    </div>
+  </div>
+
+  <!-- ==================== TELA 2: SALA PRINCIPAL ==================== -->
+  <div id="room-screen">
+    <header class="topbar">
+      <div class="topbar-left">
+        <div class="brand-title">MultiCam <span>Studio</span></div>
+        <div class="room-pill">
+          Sala: <strong id="display-room-code">---</strong>
+        </div>
+      </div>
+
+      <div class="topbar-actions">
+        <button class="btn btn-secondary btn-sm" onclick="copyInviteLink()">📋 Copiar Convite</button>
+        <button class="btn btn-secondary btn-sm" style="color: var(--danger);" onclick="leaveRoom()">🚪 Sair</button>
+      </div>
+    </header>
+
+    <main class="workspace">
+      <!-- PALCO CENTRAL: OME.TV / OMEGLE (100% NATIVO) -->
+      <section class="center-stage">
+        <div class="stage-label">
+          <span class="live-dot"></span>
+          <span id="center-title">Ome.tv / Transmissão Principal</span>
+          <span class="res-tag" id="center-res">0x0 (Nativo)</span>
+        </div>
+
+        <div class="native-video-wrapper">
+          <video id="center-video" autoplay playsinline></video>
+        </div>
+
+        <div class="stage-controls">
+          <button class="ctrl-btn" id="btn-toggle-mic" onclick="toggleMic()">
+            🎤 Mic: ON
+          </button>
+          <button class="ctrl-btn" id="btn-toggle-cam" onclick="toggleCam()">
+            📹 Cam: ON
+          </button>
+          <button class="ctrl-btn" id="btn-mirror" onclick="toggleMirror()">
+            🔄 Espelhar
+          </button>
+        </div>
+      </section>
+
+      <!-- BARRA LATERAL DIREITA: 4 SLOTS VERTICAIS DE CÂMERAS -->
+      <aside class="friends-sidebar" id="slots-container">
+        <!-- Slot 0: Você -->
+        <div class="cam-slot active" id="slot-0">
+          <div class="slot-empty">
+            <span>Lacuna 1 (Você)</span>
+          </div>
+        </div>
+
+        <!-- Slot 1: Host da Sala -->
+        <div class="cam-slot host-slot" id="slot-1">
+          <div class="slot-empty">
+            <span>Lacuna 2 (Host Ome.tv)</span>
+            <span style="font-size:11px;color:#ec4899;">Aguardando Host...</span>
+          </div>
+        </div>
+
+        <!-- Slot 2: Amigo 2 -->
+        <div class="cam-slot" id="slot-2">
+          <div class="slot-empty">
+            <span>Lacuna 3 • Vazia</span>
+            <button class="btn btn-secondary btn-sm" onclick="copyInviteLink()">+ Convidar</button>
+          </div>
+        </div>
+
+        <!-- Slot 3: Amigo 3 -->
+        <div class="cam-slot" id="slot-3">
+          <div class="slot-empty">
+            <span>Lacuna 4 • Vazia</span>
+            <button class="btn btn-secondary btn-sm" onclick="copyInviteLink()">+ Convidar</button>
+          </div>
+        </div>
+      </aside>
+    </main>
+  </div>
+
+  <div id="toast">Link copiado!</div>
+
+  <!-- Carrega a lógica modular do WebRTC Star-Relay / Mesh -->
+  <script src="app.js"></script>
+</body>
+</html>
