@@ -28,7 +28,7 @@
     .app-container {
       width: 100%;
       height: 100%;
-      max-width: 500px;
+      max-width: 540px;
       position: relative;
       background: #020617;
       display: flex;
@@ -37,12 +37,12 @@
 
     #lobbyScreen {
       margin: auto 16px;
-      background: rgba(15, 23, 42, 0.9);
+      background: rgba(15, 23, 42, 0.92);
       backdrop-filter: blur(16px);
       border: 1px solid rgba(255, 255, 255, 0.12);
       border-radius: 20px;
       padding: 24px;
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.85);
     }
 
     .header-lobby {
@@ -51,7 +51,7 @@
       align-items: center;
       margin-bottom: 16px;
     }
-    .logo { display: flex; align-items: center; gap: 8px; font-size: 18px; font-weight: 700; }
+    .logo { display: flex; align-items: center; gap: 8px; font-size: 19px; font-weight: 700; }
     .accent {
       background: linear-gradient(135deg, #6366f1, #a855f7);
       -webkit-background-clip: text;
@@ -106,22 +106,22 @@
       background: #000;
     }
 
-    .ome-video-container {
+    .stage-container {
       position: relative;
       flex: 1;
       width: 100%;
       height: 100%;
       overflow: hidden;
-      background: #090d16;
+      background: #020617;
     }
 
-    #remoteVideo {
+    #masterBroadcastVideo {
       width: 100%;
       height: 100%;
       object-fit: cover;
     }
 
-    .top-status-bar {
+    .top-bar {
       position: absolute;
       top: 14px;
       left: 14px;
@@ -144,7 +144,6 @@
       align-items: center;
       gap: 6px;
       box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
-      backdrop-filter: blur(8px);
     }
 
     .live-dot {
@@ -160,8 +159,8 @@
       100% { opacity: 1; }
     }
 
-    .connection-badge {
-      background: rgba(15, 23, 42, 0.75);
+    .status-badge {
+      background: rgba(15, 23, 42, 0.85);
       border: 1px solid rgba(255, 255, 255, 0.15);
       backdrop-filter: blur(8px);
       padding: 6px 12px;
@@ -169,39 +168,6 @@
       font-size: 11px;
       font-weight: 600;
       color: #10b981;
-    }
-
-    .mini-pip-corner {
-      position: absolute;
-      bottom: 84px;
-      right: 14px;
-      width: 95px;
-      height: 135px;
-      border-radius: 14px;
-      overflow: hidden;
-      border: 2px solid rgba(255, 255, 255, 0.7);
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.7);
-      background: #0f172a;
-      z-index: 30;
-      transition: transform 0.2s ease;
-    }
-
-    .mini-pip-corner video {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      transform: scaleX(-1);
-    }
-
-    .pip-label {
-      position: absolute;
-      bottom: 4px;
-      left: 6px;
-      background: rgba(0, 0, 0, 0.7);
-      font-size: 10px;
-      padding: 2px 6px;
-      border-radius: 4px;
-      font-weight: 600;
     }
 
     .floating-bottom-bar {
@@ -213,7 +179,7 @@
       justify-content: center;
       align-items: center;
       gap: 14px;
-      background: rgba(15, 23, 42, 0.7);
+      background: rgba(15, 23, 42, 0.75);
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
       border: 1px solid rgba(255, 255, 255, 0.12);
@@ -285,22 +251,18 @@
     </div>
 
     <div id="callScreen" class="hidden">
-      <div class="ome-video-container">
-        <video id="remoteVideo" autoplay playsinline></video>
+      <div class="stage-container">
+        <!-- CENTRO: OME.TV | 4 PONTAS: AMIGOS DA SALA -->
+        <video id="masterBroadcastVideo" autoplay playsinline></video>
 
-        <div class="top-status-bar">
+        <div class="top-bar">
           <div class="live-badge">
             <span class="live-dot"></span>
             <span>OME.TV AO VIVO</span>
           </div>
-          <div class="connection-badge">
-            🟢 Conectado
+          <div class="status-badge">
+            🟢 Sala 4-Pontas Ativa
           </div>
-        </div>
-
-        <div class="mini-pip-corner" title="Sua Câmera (está sendo transmitida no Ome.tv)">
-          <video id="localVideo" autoplay playsinline muted></video>
-          <div class="pip-label">Você</div>
         </div>
       </div>
 
@@ -328,8 +290,7 @@
     const lobbyScreen = document.getElementById('lobbyScreen');
     const callScreen = document.getElementById('callScreen');
     const lobbyVideo = document.getElementById('lobbyVideo');
-    const remoteVideo = document.getElementById('remoteVideo');
-    const localVideo = document.getElementById('localVideo');
+    const masterBroadcastVideo = document.getElementById('masterBroadcastVideo');
     const roomInput = document.getElementById('roomInput');
     const nameInput = document.getElementById('nameInput');
     const btnJoinRoom = document.getElementById('btnJoinRoom');
@@ -376,7 +337,6 @@
 
         localStream = stream;
         lobbyVideo.srcObject = stream;
-        localVideo.srcObject = stream;
         currentFacingMode = facingMode;
 
         localStream.getAudioTracks().forEach(t => (t.enabled = !isMicMuted));
@@ -399,7 +359,7 @@
 
       localStorage.setItem('multicam_guest_name', guestName);
       btnJoinRoom.disabled = true;
-      btnJoinRoom.textContent = 'Conectando ao Ome.tv...';
+      btnJoinRoom.textContent = 'Conectando à Sala...';
 
       try {
         if (!localStream) {
@@ -412,7 +372,9 @@
           config: {
             iceServers: [
               { urls: 'stun:stun.l.google.com:19302' },
-              { urls: 'stun:stun1.l.google.com:19302' }
+              { urls: 'stun:stun1.l.google.com:19302' },
+              { urls: 'stun:stun2.l.google.com:19302' },
+              { urls: 'stun:stun.cloudflare.com:3478' }
             ]
           }
         });
@@ -425,13 +387,15 @@
             conn.send({ type: 'GUEST_JOIN', name: guestName });
           });
 
+          // Chamada direta com o Host
           const call = peer.call(roomId, localStream);
           currentCall = call;
 
-          call.on('stream', (omeRemoteStream) => {
-            console.log('Vídeo da pessoa do Ome.tv recebido!', omeRemoteStream);
-            remoteVideo.srcObject = omeRemoteStream;
-            remoteVideo.play().catch(() => {});
+          // Recebe o Master Broadcast (Centro Ome.tv + 4 Pontas Amigos)
+          call.on('stream', (stream) => {
+            console.log('Master Broadcast recebido com sucesso!', stream);
+            masterBroadcastVideo.srcObject = stream;
+            masterBroadcastVideo.play().catch(() => {});
             lobbyScreen.classList.add('hidden');
             callScreen.classList.remove('hidden');
           });
