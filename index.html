@@ -3,10 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>MultiCam Duo - Entrada de Convidado</title>
+  <title>MultiCam Duo - Live Ome.tv</title>
   <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
   <style>
-    /* guest.css - Dark Mode Moderno Glassmorphism */
     * {
       box-sizing: border-box;
       margin: 0;
@@ -14,7 +13,6 @@
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       -webkit-font-smoothing: antialiased;
     }
-
     body {
       background: radial-gradient(circle at top right, #1e1b4b 0%, #0f172a 50%, #030712 100%);
       color: #f8fafc;
@@ -22,51 +20,37 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      padding: 16px;
+      padding: 12px;
     }
-
     .app-container {
       width: 100%;
-      max-width: 480px;
-      background: rgba(15, 23, 42, 0.75);
+      max-width: 520px;
+      background: rgba(15, 23, 42, 0.85);
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.12);
       border-radius: 20px;
-      padding: 24px;
+      padding: 20px;
       box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
     }
-
     .header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 20px;
+      margin-bottom: 16px;
     }
-
     .logo {
       display: flex;
       align-items: center;
       gap: 8px;
     }
-
-    .logo .icon {
-      font-size: 24px;
-    }
-
-    .logo h2 {
-      font-size: 20px;
-      font-weight: 700;
-      letter-spacing: -0.5px;
-    }
-
+    .logo .icon { font-size: 24px; }
+    .logo h2 { font-size: 19px; font-weight: 700; letter-spacing: -0.5px; }
     .accent {
       background: linear-gradient(135deg, #6366f1, #a855f7);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
     }
-
-    /* Status Pill */
     .status-pill {
       display: inline-flex;
       align-items: center;
@@ -77,83 +61,31 @@
       border-radius: 999px;
       background: rgba(255, 255, 255, 0.08);
     }
-
     .status-dot {
       width: 8px;
       height: 8px;
       border-radius: 50%;
       background: #94a3b8;
     }
-
-    .status-connected .status-dot {
-      background: #10b981;
-      box-shadow: 0 0 8px #10b981;
-    }
-
-    .status-connecting .status-dot {
-      background: #f59e0b;
-      box-shadow: 0 0 8px #f59e0b;
-    }
-
-    .status-disconnected .status-dot {
-      background: #ef4444;
-    }
-
-    /* Lobby Card */
-    .lobby-card h3 {
-      font-size: 18px;
-      font-weight: 600;
-      margin-bottom: 6px;
-    }
-
-    .subtitle {
-      font-size: 13px;
-      color: #94a3b8;
-      margin-bottom: 18px;
-      line-height: 1.4;
-    }
-
+    .status-connected .status-dot { background: #10b981; box-shadow: 0 0 8px #10b981; }
+    .status-connecting .status-dot { background: #f59e0b; box-shadow: 0 0 8px #f59e0b; }
+    .status-disconnected .status-dot { background: #ef4444; }
+    
+    .lobby-card h3 { font-size: 18px; font-weight: 600; margin-bottom: 6px; }
+    .subtitle { font-size: 13px; color: #94a3b8; margin-bottom: 16px; line-height: 1.4; }
     .preview-box {
       width: 100%;
-      height: 220px;
+      height: 200px;
       background: #090d16;
       border-radius: 14px;
       overflow: hidden;
       position: relative;
-      margin-bottom: 20px;
+      margin-bottom: 18px;
       border: 1px solid rgba(255, 255, 255, 0.1);
     }
-
-    .preview-box video {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      transform: scaleX(-1);
-    }
-
-    .video-placeholder {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      color: #64748b;
-      font-size: 14px;
-      background: #090d16;
-    }
-
-    .form-group {
-      margin-bottom: 16px;
-    }
-
-    .form-group label {
-      display: block;
-      font-size: 13px;
-      font-weight: 500;
-      color: #cbd5e1;
-      margin-bottom: 6px;
-    }
-
+    .preview-box video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
+    .form-group { margin-bottom: 14px; }
+    .form-group label { display: block; font-size: 13px; font-weight: 500; color: #cbd5e1; margin-bottom: 6px; }
     .form-group input {
       width: 100%;
       background: rgba(255, 255, 255, 0.05);
@@ -163,15 +95,11 @@
       color: #ffffff;
       font-size: 15px;
       outline: none;
-      transition: all 0.2s ease;
     }
-
     .form-group input:focus {
       border-color: #6366f1;
-      background: rgba(255, 255, 255, 0.08);
       box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25);
     }
-
     .btn {
       display: inline-flex;
       justify-content: center;
@@ -182,74 +110,81 @@
       font-weight: 600;
       border: none;
       cursor: pointer;
-      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: all 0.2s;
     }
-
-    .btn-large {
-      width: 100%;
-      padding: 14px;
-    }
-
+    .btn-large { width: 100%; padding: 14px; }
     .btn-primary {
       background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
       color: #ffffff;
       box-shadow: 0 4px 14px rgba(99, 102, 241, 0.4);
     }
+    .btn-primary:hover { filter: brightness(1.1); }
 
-    .btn-primary:hover {
-      filter: brightness(1.1);
-      transform: translateY(-1px);
-    }
-
-    .btn-primary:active {
-      transform: translateY(1px);
-    }
-
-    /* Call Screen */
-    .call-container {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-
-    .video-grid {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 12px;
-    }
-
-    .video-wrapper {
+    .call-container { display: flex; flex-direction: column; gap: 14px; }
+    
+    .main-video-wrapper {
       position: relative;
       width: 100%;
-      height: 200px;
-      border-radius: 14px;
+      height: 280px;
+      border-radius: 16px;
       overflow: hidden;
-      background: #090d16;
-      border: 1px solid rgba(255, 255, 255, 0.12);
+      background: #020617;
+      border: 2px solid rgba(99, 102, 241, 0.4);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.6);
     }
-
-    .video-wrapper video {
+    .main-video-wrapper video {
       width: 100%;
       height: 100%;
       object-fit: cover;
     }
+    .live-tag {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: rgba(239, 68, 68, 0.9);
+      color: white;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 8px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      letter-spacing: 0.5px;
+    }
+    .live-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: white;
+      animation: pulse 1s infinite;
+    }
+    @keyframes pulse {
+      0% { opacity: 1; }
+      50% { opacity: 0.3; }
+      100% { opacity: 1; }
+    }
 
-    .local-wrapper video {
+    .self-video-wrapper {
+      position: absolute;
+      bottom: 12px;
+      right: 12px;
+      width: 100px;
+      height: 130px;
+      border-radius: 10px;
+      overflow: hidden;
+      background: #090d16;
+      border: 2px solid rgba(255, 255, 255, 0.6);
+      box-shadow: 0 4px 14px rgba(0,0,0,0.6);
+      z-index: 10;
+    }
+    .self-video-wrapper video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
       transform: scaleX(-1);
     }
 
-    .video-badge {
-      position: absolute;
-      bottom: 8px;
-      left: 8px;
-      background: rgba(0, 0, 0, 0.7);
-      padding: 4px 8px;
-      border-radius: 6px;
-      font-size: 12px;
-      font-weight: 600;
-    }
-
-    /* Toolbar */
     .toolbar {
       display: flex;
       justify-content: center;
@@ -260,7 +195,6 @@
       border-radius: 16px;
       border: 1px solid rgba(255, 255, 255, 0.08);
     }
-
     .tool-btn {
       display: flex;
       flex-direction: column;
@@ -276,39 +210,13 @@
       cursor: pointer;
       transition: all 0.2s ease;
     }
-
-    .tool-btn .icon {
-      font-size: 18px;
-    }
-
-    .tool-btn .label {
-      font-size: 11px;
-      font-weight: 500;
-    }
-
-    .tool-btn:hover {
-      background: rgba(255, 255, 255, 0.16);
-    }
-
-    .tool-btn.active-off {
-      background: rgba(239, 68, 68, 0.2);
-      border-color: #ef4444;
-      color: #fca5a5;
-    }
-
-    .btn-danger {
-      background: rgba(239, 68, 68, 0.25);
-      border-color: rgba(239, 68, 68, 0.4);
-    }
-
-    .btn-danger:hover {
-      background: #ef4444;
-      color: #ffffff;
-    }
-
-    .hidden {
-      display: none !important;
-    }
+    .tool-btn .icon { font-size: 18px; }
+    .tool-btn .label { font-size: 11px; font-weight: 500; }
+    .tool-btn:hover { background: rgba(255, 255, 255, 0.16); }
+    .tool-btn.active-off { background: rgba(239, 68, 68, 0.2); border-color: #ef4444; color: #fca5a5; }
+    .btn-danger { background: rgba(239, 68, 68, 0.25); border-color: rgba(239, 68, 68, 0.4); }
+    .btn-danger:hover { background: #ef4444; color: #ffffff; }
+    .hidden { display: none !important; }
   </style>
 </head>
 <body>
@@ -324,16 +232,12 @@
       </div>
     </header>
 
-    <!-- Tela Inicial de Pré-Entrada -->
     <div id="lobbyScreen" class="card lobby-card">
       <h3>Entrar na Transmissão</h3>
-      <p class="subtitle">Sua câmera será transmitida junto com o Host no Ome.tv.</p>
+      <p class="subtitle">Você verá a pessoa do Ome.tv ao vivo e sua câmera será transmitida junto com o Host!</p>
 
       <div class="preview-box">
         <video id="lobbyVideo" autoplay playsinline muted></video>
-        <div id="videoPlaceholder" class="video-placeholder">
-          <span>📷 Câmera Desligada</span>
-        </div>
       </div>
 
       <div class="form-group">
@@ -353,17 +257,16 @@
       </div>
     </div>
 
-    <!-- Tela Ativa da Chamada -->
     <div id="callScreen" class="call-container hidden">
-      <div class="video-grid">
-        <div class="video-wrapper remote-wrapper">
-          <video id="remoteVideo" autoplay playsinline></video>
-          <div class="video-badge">👑 Host</div>
+      <div class="main-video-wrapper">
+        <video id="remoteVideo" autoplay playsinline></video>
+        <div class="live-tag">
+          <span class="live-dot"></span>
+          <span>PESSOA DO OME.TV</span>
         </div>
 
-        <div class="video-wrapper local-wrapper">
+        <div class="self-video-wrapper">
           <video id="localVideo" autoplay playsinline muted></video>
-          <div id="localNameBadge" class="video-badge">Você</div>
         </div>
       </div>
 
@@ -392,7 +295,6 @@
   </div>
 
   <script>
-    // Elementos da UI
     const lobbyScreen = document.getElementById('lobbyScreen');
     const callScreen = document.getElementById('callScreen');
     const lobbyVideo = document.getElementById('lobbyVideo');
@@ -407,7 +309,6 @@
     const btnLeaveRoom = document.getElementById('btnLeaveRoom');
     const connectionStatus = document.getElementById('connectionStatus');
     const statusText = document.getElementById('statusText');
-    const localNameBadge = document.getElementById('localNameBadge');
 
     let localStream = null;
     let peer = null;
@@ -424,9 +325,7 @@
         roomInput.readOnly = true;
       }
       const savedName = localStorage.getItem('multicam_guest_name');
-      if (savedName) {
-        nameInput.value = savedName;
-      }
+      if (savedName) nameInput.value = savedName;
     }
 
     function setStatus(status, text) {
@@ -461,7 +360,7 @@
         localStream.getVideoTracks().forEach(t => (t.enabled = !isCamOff));
         return stream;
       } catch (err) {
-        console.error('Falha ao acessar câmera/microfone:', err);
+        console.error('Falha câmera:', err);
         throw err;
       }
     }
@@ -471,15 +370,13 @@
       const guestName = nameInput.value.trim() || 'Convidado';
 
       if (!roomId) {
-        alert('Por favor, informe o ID da sala!');
+        alert('Informe o ID da sala!');
         return;
       }
 
       localStorage.setItem('multicam_guest_name', guestName);
-      localNameBadge.textContent = guestName;
-
       btnJoinRoom.disabled = true;
-      setStatus('connecting', 'Conectando...');
+      setStatus('connecting', 'Conectando ao Host...');
 
       try {
         if (!localStream) {
@@ -498,7 +395,7 @@
         });
 
         peer.on('open', (id) => {
-          console.log('Convidado conectado com Peer ID:', id);
+          console.log('Conectado com Peer ID:', id);
 
           const conn = peer.connect(roomId);
           conn.on('open', () => {
@@ -508,35 +405,35 @@
           const call = peer.call(roomId, localStream);
           currentCall = call;
 
-          call.on('stream', (hostRemoteStream) => {
-            remoteVideo.srcObject = hostRemoteStream;
-            setStatus('connected', 'Conectado');
+          call.on('stream', (omeRemoteStream) => {
+            console.log('Stream da pessoa do Ome.tv recebido!', omeRemoteStream);
+            remoteVideo.srcObject = omeRemoteStream;
+            remoteVideo.play().catch(() => {});
+            setStatus('connected', 'Conectado ao Ome.tv');
             lobbyScreen.classList.add('hidden');
             callScreen.classList.remove('hidden');
           });
 
           call.on('close', () => {
-            alert('A transmissão foi encerrada pelo Host.');
+            alert('A chamada foi encerrada pelo Host.');
             leaveRoom();
           });
 
           call.on('error', (err) => {
             console.error('Erro na chamada:', err);
             setStatus('disconnected', 'Erro na conexão');
-            alert('Não foi possível conectar à sala. Verifique o ID!');
             btnJoinRoom.disabled = false;
           });
         });
 
         peer.on('error', (err) => {
-          console.error('Erro do PeerJS:', err);
-          setStatus('disconnected', 'Falha no servidor');
-          alert('Erro ao conectar ao servidor WebRTC: ' + err.type);
+          console.error('Erro PeerJS:', err);
+          setStatus('disconnected', 'Erro servidor');
           btnJoinRoom.disabled = false;
         });
 
       } catch (err) {
-        console.error('Erro geral ao entrar:', err);
+        console.error('Erro geral:', err);
         btnJoinRoom.disabled = false;
         setStatus('disconnected', 'Erro');
       }
@@ -576,14 +473,8 @@
     });
 
     function leaveRoom() {
-      if (currentCall) {
-        try { currentCall.close(); } catch (e) {}
-        currentCall = null;
-      }
-      if (peer) {
-        try { peer.destroy(); } catch (e) {}
-        peer = null;
-      }
+      if (currentCall) { try { currentCall.close(); } catch (e) {} }
+      if (peer) { try { peer.destroy(); } catch (e) {} }
       setStatus('disconnected', 'Desconectado');
       callScreen.classList.add('hidden');
       lobbyScreen.classList.remove('hidden');
